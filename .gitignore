@@ -1,0 +1,14 @@
+# Dépendances
+node_modules/
+
+# Variables d'environnement (ne jamais versionner de secrets)
+.env
+!.env.example
+
+# Fichier généré par file-ops.js
+welcome.txt
+
+# Systèmes / éditeurs
+.DS_Store
+Thumbs.db
+.vscode/

@@ -1,4 +1,17 @@
 {
+  "name": "nodejs-scripts",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Scripts Node.js : serveur HTTP, opérations sur fichiers, générateur de mot de passe et envoi d'email",
+  "engines": {
+    "node": ">=20.6"
+  },
+  "scripts": {
+    "hello": "node hello-world.js",
+    "files": "node file-ops.js",
+    "password": "node password-generator.js",
+    "email": "node --env-file=.env email-sender.js"
+  },
   "dependencies": {
     "generate-password": "^1.7.1",
     "nodemailer": "^7.0.10"

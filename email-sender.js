@@ -1,10 +1,13 @@
 /**
  * Script d'envoi d'email via Gmail SMTP avec résolution DNS optimisée
  * 
- *  CONFIGURATION REQUISE :
- * - Remplacez "email@gmail.com" par votre adresse Gmail
- * - Remplacez "xxxxxxxxxxxxxxxx" par votre mot de passe d'application Gmail
+ *  CONFIGURATION REQUISE (variables d'environnement, voir .env.example) :
+ * - SMTP_USER : votre adresse Gmail
+ * - SMTP_PASS : votre mot de passe d'application Gmail
+ * - MAIL_TO   : l'adresse du destinataire
  * - Créez un mot de passe d'application : https://myaccount.google.com/apppasswords
+ *
+ * Lancement : node --env-file=.env email-sender.js  (ou npm run email)
  */
 
 const nodemailer = require("nodemailer");
@@ -16,6 +19,15 @@ dns.setDefaultResultOrder("ipv4first");
 dns.setServers(['8.8.8.8', '8.8.4.4']); // Utiliser les DNS de Google comme fallback
 
 const lookup = promisify(dns.lookup);
+
+// Les identifiants ne sont jamais écrits dans le code : ils viennent de l'environnement
+const { SMTP_USER, SMTP_PASS, MAIL_TO } = process.env;
+const variablesManquantes = ["SMTP_USER", "SMTP_PASS", "MAIL_TO"].filter((nom) => !process.env[nom]);
+if (variablesManquantes.length > 0) {
+  console.error(`Variables d'environnement manquantes : ${variablesManquantes.join(", ")}`);
+  console.error("Copiez .env.example vers .env, renseignez-les puis lancez : npm run email");
+  process.exit(1);
+}
 
 async function resolveHostIPv4(hostname) {
   try {
@@ -42,11 +54,10 @@ async function sendEmail() {
       port: 587,
       secure: false, // true pour 465, false pour autres ports
       auth: {
-        // ⚠️ REMPLACEZ PAR VOS VRAIES INFORMATIONS :
-        user: "email@gmail.com", // Votre adresse Gmail
+        user: SMTP_USER, // Votre adresse Gmail
         // ⚠️ IMPORTANT : Utilisez un MOT DE PASSE D'APPLICATION Gmail, pas votre mot de passe normal !
         // Créez-en un ici : https://myaccount.google.com/apppasswords
-        pass: "xxxxxxxxxxxxxxxx" // Mot de passe d'application Gmail (16 caractères sans espaces)
+        pass: SMTP_PASS // Mot de passe d'application Gmail (16 caractères sans espaces)
       },
       // Options pour éviter les timeouts
       connectionTimeout: 15000, // 15 secondes
@@ -63,8 +74,8 @@ async function sendEmail() {
     console.log("Connexion SMTP vérifiée avec succès !");
 
     let info = await transporter.sendMail({
-      from: '"Votre Nom" <email@gmail.com>', // REMPLACEZ PAR VOTRE EMAIL
-      to: "destinataire@example.com", //   REMPLACEZ PAR L'EMAIL DU DESTINATAIRE
+      from: SMTP_USER,
+      to: MAIL_TO,
       subject: "Test Node.js Email",
       text: "Salut ! Ceci est un test depuis Node.js"
     });
@@ -92,7 +103,7 @@ async function sendEmail() {
       console.error("3. Sélectionnez 'Autre (nom personnalisé)' et donnez un nom (ex: 'Node.js Email')");
       console.error("4. Cliquez sur 'Générer'");
       console.error("5. Copiez le mot de passe à 16 caractères (sans espaces)");
-      console.error("6. Remplacez la valeur de 'pass' dans le code par ce mot de passe d'application");
+      console.error("6. Renseignez ce mot de passe d'application dans la variable SMTP_PASS du fichier .env");
       console.error("\n⚠️  IMPORTANT : Vous devez utiliser un MOT DE PASSE D'APPLICATION, pas votre mot de passe Gmail normal !");
     }
     

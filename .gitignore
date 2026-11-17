@@ -3,6 +3,7 @@ node_modules/
 
 # Variables d'environnement (ne jamais versionner de secrets)
 .env
+.env.*
 !.env.example
 
 # Fichier généré par file-ops.js
